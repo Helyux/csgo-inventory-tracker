@@ -1,0 +1,13 @@
+[Auth]
+apikey = ''                                 # Your steam API-key (https://steamcommunity.com/dev/apikey)
+
+[SQL]
+hostname = 'localhost'                      # MySQL server hostname
+username =  ''                              # MySQL username
+password = ''                               # MySQL password
+db_items = ''                               # Database used to track item values
+db_inventory = ''                           # Database used to track inventory values
+
+[Other]
+steam_id = ''                               # Your steamID64 (https://steamid.io/lookup)
+currency = 'EUR'                            # Currency symbol (https://en.wikipedia.org/wiki/ISO_4217#Active_codes)
