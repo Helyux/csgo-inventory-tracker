@@ -130,3 +130,9 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+# Env
+prod.toml
+
+# Log
+log/
