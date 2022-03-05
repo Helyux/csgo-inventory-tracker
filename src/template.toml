@@ -3,6 +3,7 @@ apikey = ''                                 # Your steam API-key (https://steamc
 
 [SQL]
 hostname = 'localhost'                      # MySQL server hostname
+port = '3306'                               # MySQL server port
 username =  ''                              # MySQL username
 password = ''                               # MySQL password
 db_name = ''                                # MySQL Database with 'grant all' rights
