@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "26.02.2022"
+__date__ = "06.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -19,6 +19,7 @@ class SQLinstance:
         self.connection = None
         self.cursor = None
         self.hostname = config['SQL']['hostname']
+        self.port = config['SQL']['port']
         self.username = config['SQL']['username']
         self.password = config['SQL']['password']
         self.db = config['SQL']['db_name']
@@ -29,7 +30,7 @@ class SQLinstance:
 
     def check_database(self):
         #  Check if the database exists
-        qtx = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'"
+        qtx = f"SELECT * FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{self.db}'"
         if self.connection:
             if not len(self.query(qtx.replace('DBName', self.db))) > 0:
                 self.log.pipeOut(f"Database {self.db} doesn't exist.", lvl="critical")
@@ -39,7 +40,7 @@ class SQLinstance:
 
     def check_tables(self):
         # Check if the default needed tables exist
-        qtx = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TBLName'"
+        qtx = f"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.db}' AND TABLE_NAME = 'TBLName'"
         if self.connection:
             for table in self.default_tables:
                 if not len(self.query(qtx.replace('TBLName', table))) > 0:
@@ -86,9 +87,11 @@ class SQLinstance:
 
     def connect(self):
         try:
-            self.connection = mysql.connector.connect(host=self.hostname, user=self.username, password=self.password)
+            self.connection = mysql.connector.connect(host=self.hostname, port=self.port,
+                                                      user=self.username, password=self.password)
             self.cursor = self.connection.cursor()
             self.log.pipeOut(f"Connected to {self.hostname}")
+
         except mysql.connector.Error as e:
             self.log.pipeOut(e, lvl="error")
 
@@ -97,7 +100,7 @@ class SQLinstance:
         if self.connection:
             self.cursor.execute(qtx)
             for row in self.cursor:
-                self.log.pipeOut(f"{row} / {qtx}", lvl="debug")
+                # self.log.pipeOut(f"{row} / {qtx}", lvl="debug")
                 rows.append(row)
 
         return rows
