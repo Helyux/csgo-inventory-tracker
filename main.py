@@ -29,7 +29,10 @@ def main():
     # Load toml config
     config = util.getConf("prod.toml", log)
     sql = util_sql.SQLinstance(config, log)
+
     sql.connect()
+    sql.check_database()
+    sql.check_tables()
     sql.disconnect()
 
 

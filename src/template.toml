@@ -5,8 +5,7 @@ apikey = ''                                 # Your steam API-key (https://steamc
 hostname = 'localhost'                      # MySQL server hostname
 username =  ''                              # MySQL username
 password = ''                               # MySQL password
-db_items = ''                               # Database used to track item values
-db_inventory = ''                           # Database used to track inventory values
+db_name = ''                                # MySQL Database with 'grant all' rights
 
 [Other]
 steam_id = ''                               # Your steamID64 (https://steamid.io/lookup)
