@@ -22,7 +22,7 @@ class SQLinstance:
         self.username = config['SQL']['username']
         self.password = config['SQL']['password']
         self.db = config['SQL']['db_name']
-        self.default_tables = ['items']
+        self.default_tables = ['items', 'users', 'inventories']
 
         if not self.db:
             self.log.pipeOut("Please provide the name of the Database in your config.", lvl="critical")
@@ -49,14 +49,38 @@ class SQLinstance:
 
     def setup_table(self, table_name):
         self.log.pipeOut(f"Setting up new Table [{table_name}]")
+
         if table_name == "items":
             self.query("CREATE TABLE `items` ("
                        "`ID` INT(10) NOT NULL AUTO_INCREMENT,"
-                       "`Name` VARCHAR(50) NULL DEFAULT NULL,"
+                       "`Name` VARCHAR(50) NOT NULL,"
                        "`Lowest` DOUBLE NULL DEFAULT NULL,"
                        "`Median` DOUBLE NULL DEFAULT NULL,"
-                       "`Updated` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
+                       "`Updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
                        "PRIMARY KEY (`ID`) USING BTREE)"
+                       "COLLATE='utf8_german2_ci'"
+                       "ENGINE=InnoDB;")
+
+        if table_name == "users":
+            self.query("CREATE TABLE `users` ("
+                       "`ID` INT(10) NOT NULL AUTO_INCREMENT,"
+                       "`Username` VARCHAR(50) NOT NULL DEFAULT '0',"
+                       "`SteamID` VARCHAR(50) NOT NULL DEFAULT '0',"
+                       "`Registered` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                       "PRIMARY KEY (`ID`) USING BTREE)"
+                       "COLLATE='utf8_german2_ci'"
+                       "ENGINE=InnoDB;")
+
+        if table_name == "inventories":
+            self.query("CREATE TABLE `inventories` ("
+                       "`ID` INT(10) NOT NULL AUTO_INCREMENT,"
+                       "`UID` INT(10) NOT NULL,"
+                       "`Value` INT(10) NOT NULL,"
+                       "`Created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                       "PRIMARY KEY (`ID`) USING BTREE,"
+                       "INDEX `fk_inventory_UID` (`UID`) USING BTREE,"
+                       "CONSTRAINT `fk_inventory_UID` FOREIGN KEY (`UID`) REFERENCES "
+                           "`csgo_inventory_tracker`.`users` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION)"
                        "COLLATE='utf8_german2_ci'"
                        "ENGINE=InnoDB;")
 
@@ -73,7 +97,7 @@ class SQLinstance:
         if self.connection:
             self.cursor.execute(qtx)
             for row in self.cursor:
-                self.log.pipeOut(row, lvl="debug")
+                self.log.pipeOut(f"{row} / {qtx}", lvl="debug")
                 rows.append(row)
 
         return rows
