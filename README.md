@@ -20,19 +20,23 @@
 3. `pipenv run python main.py`
 
 ## SQL Configuration :wrench:
-1. Login as root
+1. Login as root\
 `mysql -u root -p`
+<br/>
 
-2. Create a SQL User
+3. Create a SQL User\
 `CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';`
+<br/>
 
-3. Setup a SQL Database
+4. Setup a SQL Database\
 `CREATE DATABASE IF NOT EXISTS databasename;`
+<br/>
 
-4. Grant all rights for the created user to the created database
+5. Grant all rights for the created user to the created database\
 `GRANT ALL PRIVILEGES ON databasename.* TO 'username'@'localhost';`
+<br/>
 
-5. Flush privileges
+6. Flush privileges\
 `FLUSH PRIVILEGES;`
 
 ## Configuration  :clipboard:
