@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "26.02.2022"
+__date__ = "12.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -32,16 +32,15 @@ def getConf(fname, log):
                 checkConf(config)
                 return config
             except ValueError as e:
-                log.critical(f"The provided '.toml' is probably invalid, returned error:\n{e}")
-                exit(1)
+                log.pipeOut(f"The provided '.toml' is probably invalid, returned error:\n{e}", lvl="critical")
         else:
-            log.critical(f"Couldn't locate the '.toml' file [{fname}].")
-            log.info("Creating a new '.toml' file from template, please edit and restart.")
+            log.pipeOut(f"Couldn't locate the '.toml' file [{fname}].", lvl="error")
+            log.pipeOut("Creating a new '.toml' file from template, please edit and restart.")
             shutil.copy("src/template.toml", fname)
             exit(1)
     else:
-        log.critical(f"The provided config file [{fname}] is not a '.toml' file.")
-        log.info("Creating a new '.toml' file from template, please edit and restart.")
+        log.pipeOut(f"The provided config file [{fname}] is not a '.toml' file.", lvl="error")
+        log.pipeOut("Creating a new '.toml' file from template, please edit and restart.")
         shutil.copy("src/template.toml", "prod.toml")
         exit(1)
 
@@ -58,8 +57,10 @@ class Logger:
     Create a rotating log in a log folder
     """
 
-    def __init__(self, logpath, lvl="DEBUG"):
-        self.log = logging.getLogger()
+    def __init__(self, logpath, reprint=True, lvl="DEBUG"):
+
+        self.reprint = reprint
+        self.log = logging.getLogger("mylog")
         if not os.path.exists(logpath):
             os.makedirs(logpath)
         handler = RotatingFileHandler(logpath + r"/csgo-inventory-tracker.log",
@@ -71,7 +72,7 @@ class Logger:
         self.log.addHandler(handler)
         self.log.setLevel(lvl)
 
-    def pipeOut(self, msg, lvl="INFO", reprint=True):
+    def pipeOut(self, msg, lvl="INFO"):
         """
         All output pipes through this function.
         It's possible to print the output to console [set reprint to True]
@@ -82,7 +83,7 @@ class Logger:
         lvln = int(getattr(logging, lvl))
         self.log.log(lvln, msg)
 
-        if reprint:
+        if self.reprint:
             print(f"[{time.strftime('%H:%M:%S')}]{f'[{lvl}]':10s} {msg}")
 
         if lvl == "CRITICAL":

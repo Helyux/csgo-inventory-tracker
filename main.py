@@ -4,19 +4,22 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "06.03.2022"
+__date__ = "12.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
 import os
 import sys
+import time
 
 # Self
 from src import util
 from src import util_sql
+from src import util_steam
 
 
 def main():
+
     # Start logger
     logpath = os.path.dirname(os.path.abspath(__file__)) + r"/log"
     log = util.Logger(logpath)
@@ -32,6 +35,22 @@ def main():
     sql.connect()
     sql.check_database()
     sql.check_tables()
+
+    # Steam
+    print("\n<<< Exit using CTRL-C >>>\n")
+    steam = util_steam.SteamInstance(log)
+    total = steam.getInventoryValue(config['Other']['steam_id'])
+    print(f"{total:.2f}")
+
+    """
+    try:
+        while True:
+            print("exit me kekw")
+    except KeyboardInterrupt:
+        pass
+    """
+
+    # Disconnect
     sql.disconnect()
 
 

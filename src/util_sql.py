@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "06.03.2022"
+__date__ = "12.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -93,7 +93,7 @@ class SQLinstance:
             self.log.pipeOut(f"Connected to {self.hostname}")
 
         except mysql.connector.Error as e:
-            self.log.pipeOut(e, lvl="error")
+            self.log.pipeOut(e, lvl="critical")
 
     def query(self, qtx):
         rows = []
