@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "12.03.2022"
+__date__ = "17.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -35,10 +35,20 @@ class SteamInstance:
         """
 
         url = f"https://steamcommunity.com/inventory/{steam_id}/730/2"
-        """
+
+        """ this is production
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
         """
+
+        """ Get json to test with once
+        req = self.doSteamRequest(url)
+        data = json.loads(req.text)
+        with open('example_data.json', 'w') as f:
+            json.dump(data, f)
+        """
+
+        # This is to test
         with open('example_data.json') as tx:
             data = json.load(tx)
 
@@ -64,16 +74,35 @@ class SteamInstance:
         cumulated = self.getCumulated(data['assets'])
 
         for item in data['descriptions']:
-            print(f"Bucket: {self.bucket} / Name {item['name']} / Tradeable {item['tradable']}")
-            if item['tradable'] == 1:
+            print(f"Bucket: {self.bucket} / Name {item['name']} / "
+                  f"Tradeable {item['tradable']} / Marketable {item['marketable']}")
+            if item['marketable'] == 1:
                 num_owned = cumulated[item['classid']]
-                item_hash = requote_uri(item['market_hash_name'])
+                item_hash = item['market_hash_name']
                 price_data = self.getItemPrice(item_hash)
-                price_lowest = self.sanatize(price_data['lowest_price'])
-                price_median = self.sanatize(price_data['median_price'])
+
+                if 'lowest_price' in price_data:
+                    price_lowest = self.sanatize(price_data['lowest_price'])
+                else:
+                    # Price lowest is needed for calculation, atleast show error where missing
+                    # Would be good to take the last entry in the db if we couldn't get a new one
+                    price_lowest = None
+                    self.log.pipeOut(f"No 'lowest_price' on {item['name']}, calculation might be false", lvl='error')
+                    continue
+
+                if 'median_price' in price_data:
+                    price_median = self.sanatize(price_data['median_price'])
+                else:
+                    price_median = None
+
+                if 'volume' in price_data:
+                    price_volume = price_data['volume']
+                else:
+                    price_volume = None
+
                 price_cumulated = float(num_owned) * float(price_lowest)
 
-                print(f"lowest: {price_lowest}€ / median: {price_median}€ / "
+                print(f"lowest: {price_lowest}€ / median: {price_median}€ / volume: {price_volume} / "
                       f"owned: {num_owned} / total: {str(price_cumulated)}€")
 
                 total += price_cumulated
@@ -136,6 +165,22 @@ class SteamInstance:
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
 
+        # Check all keys are available
+        expected_keys = ['success', 'lowest_price', 'volume', 'median_price']
+
+        # Retries
+        max_retries = 3
+        retries = 1
+
+        while retries <= max_retries and not all(k in data for k in expected_keys):
+            self.log.pipeOut(f"Missing keys for {item_hash}, retrying [{retries}/{max_retries}]", lvl='warning')
+
+            req = self.doSteamRequest(url)
+            data = json.loads(req.text)
+
+            retries += 1
+            time.sleep(1)
+
         if data:
             return data
 
@@ -146,6 +191,8 @@ class SteamInstance:
 
         if self.bucket == 20:
             self.cooldown()
+
+        url = requote_uri(url)  # requote because item_hash often contains spaces
 
         self.log.pipeOut(f"Requesting [{url}]", lvl='debug')
         req = requests.get(url, cookies=self.cookies)
@@ -172,7 +219,8 @@ class SteamInstance:
         time.sleep(60)
         self.bucket = 0
 
-    def sanatize(self, price):
+    @staticmethod
+    def sanatize(price):
         """
 
         """

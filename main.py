@@ -4,13 +4,12 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "12.03.2022"
+__date__ = "17.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
 import os
 import sys
-import time
 
 # Self
 from src import util
