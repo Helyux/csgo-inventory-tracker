@@ -17,13 +17,46 @@ from statistics import median
 from requests.utils import requote_uri
 
 
+def getCurrency(config):
+    """
+
+    https://partner.steamgames.com/doc/store/pricing/currencies
+    """
+
+    currency_name = config['Other']['currency']
+
+    with open('./src/steam_currency_values.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        if currency_name in data:
+            currency_num = int(data[currency_name]['num'])
+            currency_symbol = data[currency_name]['symbol']
+        else:
+            currency_num = 3  # Default to EUR if defined not found
+            currency_symbol = "€"
+
+    return currency_num, currency_symbol
+
+
+def sanatize(price):
+    """
+
+    """
+    price = price[:-1]  # Remove the currency symbol (like $/€ etc)
+    if ",--" in price:
+        sanatized_price = price.replace(",--", ".00")
+    else:
+        sanatized_price = price.replace(",", ".")
+
+    return sanatized_price
+
+
 class SteamInstance:
 
-    def __init__(self, log):
+    def __init__(self, config, log):
 
-        self.currency = 3
         self.log = log
         self.bucket = 0
+        self.currency, self.symbol = getCurrency(config)
         self.cookies = {'steamLoginSecure': 'xxx'}
 
         # Stop requests libary from logging
@@ -82,7 +115,7 @@ class SteamInstance:
                 price_data = self.getItemPrice(item_hash)
 
                 if 'lowest_price' in price_data:
-                    price_lowest = self.sanatize(price_data['lowest_price'])
+                    price_lowest = sanatize(price_data['lowest_price'])
                 else:
                     # Price lowest is needed for calculation, atleast show error where missing
                     # Would be good to take the last entry in the db if we couldn't get a new one
@@ -91,7 +124,7 @@ class SteamInstance:
                     continue
 
                 if 'median_price' in price_data:
-                    price_median = self.sanatize(price_data['median_price'])
+                    price_median = sanatize(price_data['median_price'])
                 else:
                     price_median = None
 
@@ -102,8 +135,8 @@ class SteamInstance:
 
                 price_cumulated = float(num_owned) * float(price_lowest)
 
-                print(f"lowest: {price_lowest}€ / median: {price_median}€ / volume: {price_volume} / "
-                      f"owned: {num_owned} / total: {str(price_cumulated)}€")
+                print(f"lowest: {price_lowest} {self.symbol} / median: {price_median} {self.symbol} / "
+                      f"volume: {price_volume} / owned: {num_owned} / total: {str(price_cumulated)} {self.symbol}")
 
                 total += price_cumulated
 
@@ -211,26 +244,13 @@ class SteamInstance:
 
         return req
 
-    def cooldown(self):
+    def cooldown(self, seconds=60):
         """
 
         """
-        self.log.pipeOut("Bucket is full, starting cooldown", lvl='debug')
-        time.sleep(60)
+        self.log.pipeOut(f"Bucket is full, starting [{seconds}] second cooldown", lvl='debug')
+        time.sleep(seconds)
         self.bucket = 0
-
-    @staticmethod
-    def sanatize(price):
-        """
-
-        """
-        price = price[:-1]  # Remove the Symbol (like $/€ etc)
-        if ",--" in price:
-            sanatized_price = price.replace(",--", ".00")
-        else:
-            sanatized_price = price.replace(",", ".")
-
-        return sanatized_price
 
 
 if __name__ == "__main__":

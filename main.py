@@ -37,7 +37,7 @@ def main():
 
     # Steam
     print("\n<<< Exit using CTRL-C >>>\n")
-    steam = util_steam.SteamInstance(log)
+    steam = util_steam.SteamInstance(config, log)
     total = steam.getInventoryValue(config['Other']['steam_id'])
     print(f"{total:.2f}")
 

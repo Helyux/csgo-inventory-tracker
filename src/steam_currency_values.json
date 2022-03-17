@@ -1,0 +1,158 @@
+{
+  "USD": {
+    "num" : "1",
+    "symbol": "$"
+    },
+  "GBP": {
+    "num" : "2",
+    "symbol": ""
+    },
+  "EUR": {
+    "num" : "3",
+    "symbol": "€"
+    },
+  "CHF": {
+    "num" : "4",
+    "symbol": ""
+    },
+  "RUB": {
+    "num" : "5",
+    "symbol": ""
+    },
+  "PLN": {
+    "num" : "6",
+    "symbol": ""
+    },
+  "BRL": {
+    "num" : "7",
+    "symbol": ""
+    },
+  "JPY": {
+    "num" : "8",
+    "symbol": ""
+    },
+  "NOK": {
+    "num" : "9",
+    "symbol": ""
+    },
+  "IDR": {
+    "num" : "10",
+    "symbol": ""
+    },
+  "MYR": {
+    "num" : "11",
+    "symbol": ""
+    },
+  "PHP": {
+    "num" : "12",
+    "symbol": ""
+    },
+  "SGD": {
+    "num" : "13",
+    "symbol": ""
+    },
+  "THB": {
+    "num" : "14",
+    "symbol": ""
+    },
+  "VND": {
+    "num" : "15",
+    "symbol": ""
+    },
+  "KRW": {
+    "num" : "16",
+    "symbol": ""
+    },
+  "TRY": {
+    "num" : "17",
+    "symbol": ""
+    },
+  "UAH": {
+    "num" : "18",
+    "symbol": ""
+    },
+  "MXN": {
+    "num" : "19",
+    "symbol": ""
+    },
+  "CAD": {
+    "num" : "20",
+    "symbol": ""
+    },
+  "AUD": {
+    "num" : "21",
+    "symbol": ""
+    },
+  "NZD": {
+    "num" : "22",
+    "symbol": ""
+    },
+  "CNY": {
+    "num" : "23",
+    "symbol": ""
+    },
+  "INR": {
+    "num" : "24",
+    "symbol": ""
+    },
+  "CLP": {
+    "num" : "25",
+    "symbol": ""
+    },
+  "PEN": {
+    "num" : "26",
+    "symbol": ""
+    },
+  "COP": {
+    "num" : "27",
+    "symbol": ""
+    },
+  "ZAR": {
+    "num" : "28",
+    "symbol": ""
+    },
+  "HKD": {
+    "num" : "29",
+    "symbol": ""
+    },
+  "TWD": {
+    "num" : "30",
+    "symbol": ""
+    },
+  "SAR": {
+    "num" : "31",
+    "symbol": ""
+    },
+  "AED": {
+    "num" : "32",
+    "symbol": ""
+    },
+  "ARS": {
+    "num" : "34",
+    "symbol": ""
+    },
+  "ILS": {
+    "num" : "35",
+    "symbol": ""
+    },
+  "KZT": {
+    "num" : "37",
+    "symbol": ""
+    },
+  "KWD": {
+    "num" : "38",
+    "symbol": ""
+    },
+  "QAR": {
+    "num" : "39",
+    "symbol": ""
+    },
+  "CRC": {
+    "num" : "40",
+    "symbol": ""
+    },
+  "UYU": {
+    "num" : "41",
+    "symbol": ""
+    }
+}
