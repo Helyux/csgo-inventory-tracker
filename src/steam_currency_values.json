@@ -5,7 +5,7 @@
     },
   "GBP": {
     "num" : "2",
-    "symbol": ""
+    "symbol": "£"
     },
   "EUR": {
     "num" : "3",
@@ -13,119 +13,119 @@
     },
   "CHF": {
     "num" : "4",
-    "symbol": ""
+    "symbol": "CHF"
     },
   "RUB": {
     "num" : "5",
-    "symbol": ""
+    "symbol": "₽"
     },
   "PLN": {
     "num" : "6",
-    "symbol": ""
+    "symbol": "zł"
     },
   "BRL": {
     "num" : "7",
-    "symbol": ""
+    "symbol": "R$"
     },
   "JPY": {
     "num" : "8",
-    "symbol": ""
+    "symbol": "¥"
     },
   "NOK": {
     "num" : "9",
-    "symbol": ""
+    "symbol": "kr"
     },
   "IDR": {
     "num" : "10",
-    "symbol": ""
+    "symbol": "Rp"
     },
   "MYR": {
     "num" : "11",
-    "symbol": ""
+    "symbol": "RM"
     },
   "PHP": {
     "num" : "12",
-    "symbol": ""
+    "symbol": "₱"
     },
   "SGD": {
     "num" : "13",
-    "symbol": ""
+    "symbol": "$"
     },
   "THB": {
     "num" : "14",
-    "symbol": ""
+    "symbol": "฿"
     },
   "VND": {
     "num" : "15",
-    "symbol": ""
+    "symbol": "₫"
     },
   "KRW": {
     "num" : "16",
-    "symbol": ""
+    "symbol": "₩"
     },
   "TRY": {
     "num" : "17",
-    "symbol": ""
+    "symbol": "₺"
     },
   "UAH": {
     "num" : "18",
-    "symbol": ""
+    "symbol": "₴"
     },
   "MXN": {
     "num" : "19",
-    "symbol": ""
+    "symbol": "$"
     },
   "CAD": {
     "num" : "20",
-    "symbol": ""
+    "symbol": "$"
     },
   "AUD": {
     "num" : "21",
-    "symbol": ""
+    "symbol": "$"
     },
   "NZD": {
     "num" : "22",
-    "symbol": ""
+    "symbol": "$"
     },
   "CNY": {
     "num" : "23",
-    "symbol": ""
+    "symbol": "¥"
     },
   "INR": {
     "num" : "24",
-    "symbol": ""
+    "symbol": "₹"
     },
   "CLP": {
     "num" : "25",
-    "symbol": ""
+    "symbol": "$"
     },
   "PEN": {
     "num" : "26",
-    "symbol": ""
+    "symbol": "S/."
     },
   "COP": {
     "num" : "27",
-    "symbol": ""
+    "symbol": "$"
     },
   "ZAR": {
     "num" : "28",
-    "symbol": ""
+    "symbol": "R"
     },
   "HKD": {
     "num" : "29",
-    "symbol": ""
+    "symbol": "$"
     },
   "TWD": {
     "num" : "30",
-    "symbol": ""
+    "symbol": "NT$"
     },
   "SAR": {
     "num" : "31",
-    "symbol": ""
+    "symbol": "﷼"
     },
   "AED": {
     "num" : "32",
-    "symbol": ""
+    "symbol": " د.إ"
     },
   "ARS": {
     "num" : "34",
@@ -133,11 +133,11 @@
     },
   "ILS": {
     "num" : "35",
-    "symbol": ""
+    "symbol": "₪"
     },
   "KZT": {
     "num" : "37",
-    "symbol": ""
+    "symbol": "лв"
     },
   "KWD": {
     "num" : "38",
@@ -145,14 +145,14 @@
     },
   "QAR": {
     "num" : "39",
-    "symbol": ""
+    "symbol": "﷼"
     },
   "CRC": {
     "num" : "40",
-    "symbol": ""
+    "symbol": "₡"
     },
   "UYU": {
     "num" : "41",
-    "symbol": ""
+    "symbol": "$U"
     }
 }
