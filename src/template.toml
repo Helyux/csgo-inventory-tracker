@@ -10,5 +10,5 @@ db_name = ''                                # MySQL Database with 'grant all' ri
 
 [Other]
 steam_id = ''                               # Your steamID64 (https://steamid.io/lookup)
-currency = 'EUR'                            # Currency symbol (https://en.wikipedia.org/wiki/ISO_4217#Active_codes)
+currency = 'EUR'                            # Currency code (https://en.wikipedia.org/wiki/ISO_4217#Active_codes)
 idfile = false                              # If this is set to true create/use a file containing steam ids to scan

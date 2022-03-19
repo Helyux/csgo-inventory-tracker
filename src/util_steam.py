@@ -204,6 +204,17 @@ class SteamInstance:
         # Check all keys are available
         expected_keys = ['success', 'lowest_price', 'volume', 'median_price']
 
+        """
+        ----------------------------------------------------------------------------
+        Not sure if i like the retry System.
+        Most of the time the three retries don't change the returned values.
+        So we get nothing for retrying other then slowing down the whole execution.
+        (Bucket filling up / sleep timer in between retries)
+        
+        Maybe think about somethink like a reque to the end.
+        ----------------------------------------------------------------------------
+        """
+
         # Retries
         max_retries = 3
         retries = 1

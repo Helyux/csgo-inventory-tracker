@@ -12,12 +12,7 @@
      \__|_|  \__,_|\___|_|\_\___|_|             
 
 ## Prerequisites :airplane:
-- Have a MySQL Server
-
-## Installation :zap:
-1. `git clone https://github.com/Helyux/csgo-inventory-tracker`
-2. `pipenv install`
-3. `pipenv run python main.py`
+- MySQL Server
 
 ## SQL Configuration :wrench:
 1. Login as root\
@@ -34,6 +29,11 @@
 
 6. Flush privileges\
 `FLUSH PRIVILEGES;`
+
+## Installation :zap:
+1. `git clone https://github.com/Helyux/csgo-inventory-tracker`
+2. `pipenv install`
+3. `pipenv run python main.py`
 
 ## Configuration  :clipboard:
 1. Make a copy of template.toml named prod.toml in the base directory
