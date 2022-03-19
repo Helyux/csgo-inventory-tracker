@@ -8,12 +8,15 @@ __date__ = "17.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
+# Default
 import json
 import time
 import logging
-import requests
 import datetime
 from statistics import median
+
+# Custom
+import requests
 from requests.utils import requote_uri
 
 

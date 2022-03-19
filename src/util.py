@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "12.03.2022"
+__date__ = "19.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -63,7 +63,8 @@ class Logger:
         self.log = logging.getLogger("mylog")
         if not os.path.exists(logpath):
             os.makedirs(logpath)
-        handler = RotatingFileHandler(logpath + r"/csgo-inventory-tracker.log",
+
+        handler = RotatingFileHandler(os.path.join(logpath, "csgo-inventory-tracker.log"),
                                       encoding='utf-8',
                                       maxBytes=1 * 1024 * 1024,
                                       backupCount=10)

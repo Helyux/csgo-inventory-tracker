@@ -4,11 +4,10 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "17.03.2022"
+__date__ = "19.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
-import os
 import sys
 
 # Self
@@ -20,7 +19,7 @@ from src import util_steam
 def main():
 
     # Start logger
-    logpath = os.path.dirname(os.path.abspath(__file__)) + r"/log"
+    logpath = "./log"
     log = util.Logger(logpath)
 
     # Log any unhandled exception
