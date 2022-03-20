@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "19.03.2022"
+__date__ = "20.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -57,14 +57,14 @@ class Logger:
     Create a rotating log in a log folder
     """
 
-    def __init__(self, logpath, reprint=True, lvl="DEBUG"):
+    def __init__(self, logpath, logname, reprint=True, lvl="INFO"):
 
         self.reprint = reprint
         self.log = logging.getLogger("mylog")
         if not os.path.exists(logpath):
             os.makedirs(logpath)
 
-        handler = RotatingFileHandler(os.path.join(logpath, "csgo-inventory-tracker.log"),
+        handler = RotatingFileHandler(os.path.join(logpath, logname),
                                       encoding='utf-8',
                                       maxBytes=1 * 1024 * 1024,
                                       backupCount=10)
@@ -84,7 +84,7 @@ class Logger:
         lvln = int(getattr(logging, lvl))
         self.log.log(lvln, msg)
 
-        if self.reprint:
+        if self.reprint and lvln >= self.log.level:
             print(f"[{time.strftime('%H:%M:%S')}]{f'[{lvl}]':10s} {msg}")
 
         if lvl == "CRITICAL":

@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "17.03.2022"
+__date__ = "20.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -28,7 +28,7 @@ def getCurrency(config):
 
     currency_name = config['Other']['currency']
 
-    with open('./src/steam_currency_values.json', 'r', encoding='utf-8') as f:
+    with open('./src/steam_currency.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         if currency_name in data:
             currency_num = int(data[currency_name]['num'])
@@ -40,30 +40,74 @@ def getCurrency(config):
     return currency_num, currency_symbol
 
 
-def sanatize(price):
+def sanatize(price_data):
     """
 
     """
-    price = price[:-1]  # Remove the currency symbol (like $/€ etc)
-    if ",--" in price:
-        sanatized_price = price.replace(",--", ".00")
-    else:
-        sanatized_price = price.replace(",", ".")
 
-    return sanatized_price
+    sanatized_price_data = {}
+
+    for key, value in price_data.items():
+        if 'price' in key:
+            value = value[:-1]  # Remove the currency symbol (like $/€ etc)
+            if ",--" in value:
+                sanatized_price = value.replace(",--", ".00")
+            else:
+                sanatized_price = value.replace(",", ".")
+
+            sanatized_price_data[key] = sanatized_price
+        elif 'volume' in key:
+            sanatized_volume = value.replace(",", "")
+            sanatized_price_data[key] = sanatized_volume
+        else:
+            sanatized_price_data[key] = value
+
+    # Add missing keys
+    expected_keys = ['success', 'lowest_price', 'volume', 'median_price']
+    for key in expected_keys:
+        if key not in sanatized_price_data:
+            sanatized_price_data[key] = None
+
+    return sanatized_price_data
 
 
 class SteamInstance:
 
-    def __init__(self, config, log):
+    def __init__(self, sql, config, log):
 
         self.log = log
+        self.sql = sql
+
         self.bucket = 0
         self.currency, self.symbol = getCurrency(config)
         self.cookies = {'steamLoginSecure': 'xxx'}
+        self.apikey = config['Auth']['apikey']
 
         # Stop requests libary from logging
         logging.getLogger("requests").setLevel(logging.WARNING)
+
+    def getUserInfo(self, steam_id):
+        url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.apikey}&steamids={steam_id}"
+        req = self.doSteamRequest(url)
+        data = json.loads(req.text)
+
+        if data:
+            player_data = data['response']['players'][0]
+            nickname = player_data['personaname']
+            if player_data['profilestate'] == 1:
+                if player_data['communityvisibilitystate'] == 3:
+                    customurl = player_data['profileurl']
+                    return {'id': steam_id,
+                            'nickname': nickname,
+                            'customurl': customurl}
+                else:
+                    self.log.pipeOut(f"Won't add [{nickname}] with id [{steam_id}] to database, "
+                                     f"the profile is private", lvl='warning')
+                    return None
+            else:
+                self.log.pipeOut(f"Won't add [{nickname}] with id [{steam_id}] to database, "
+                                 f"the profile is not setup", lvl='warning')
+                return None
 
     def getInventory(self, steam_id):
         """
@@ -72,12 +116,14 @@ class SteamInstance:
 
         url = f"https://steamcommunity.com/inventory/{steam_id}/730/2"
 
-        """ this is production
+        """
+        # This is production
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
         """
 
-        """ Get json to test with once
+        """
+        # Get json to test with once
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
         with open('example_data.json', 'w') as f:
@@ -110,36 +156,37 @@ class SteamInstance:
         cumulated = self.getCumulated(data['assets'])
 
         for item in data['descriptions']:
-            print(f"Bucket: {self.bucket} / Name {item['name']} / "
-                  f"Tradeable {item['tradable']} / Marketable {item['marketable']}")
+
+            self.log.pipeOut(f"Bucket: {self.bucket} / Name {item['name']} / "
+                             f"Tradeable {item['tradable']} / Marketable {item['marketable']}", lvl='DEBUG')
+
             if item['marketable'] == 1:
                 num_owned = cumulated[item['classid']]
                 item_hash = item['market_hash_name']
-                price_data = self.getItemPrice(item_hash)
+                price_data = sanatize(self.getItemPrice(item_hash))
 
-                if 'lowest_price' in price_data:
-                    price_lowest = sanatize(price_data['lowest_price'])
+                # Transfer price_data to database
+                dbid = self.sql.getItemDBIDfromHash(item_hash)
+                if dbid:
+                    self.sql.updateItem(dbid, price_data)
                 else:
+                    self.sql.insertItem(item['name'], item_hash, price_data, classid=item['classid'])
+
+                price_lowest = price_data['lowest_price']
+                price_median = price_data['median_price']
+                price_volume = price_data['volume']
+
+                if not price_data['lowest_price']:
                     # Price lowest is needed for calculation, atleast show error where missing
                     # Would be good to take the last entry in the db if we couldn't get a new one
-                    price_lowest = None
                     self.log.pipeOut(f"No 'lowest_price' on {item['name']}, calculation might be false", lvl='error')
                     continue
 
-                if 'median_price' in price_data:
-                    price_median = sanatize(price_data['median_price'])
-                else:
-                    price_median = None
-
-                if 'volume' in price_data:
-                    price_volume = price_data['volume']
-                else:
-                    price_volume = None
-
                 price_cumulated = float(num_owned) * float(price_lowest)
 
-                print(f"lowest: {price_lowest} {self.symbol} / median: {price_median} {self.symbol} / "
-                      f"volume: {price_volume} / owned: {num_owned} / total: {str(price_cumulated)} {self.symbol}")
+                self.log.pipeOut(f"lowest: {price_lowest} {self.symbol} / median: {price_median} {self.symbol} / "
+                                 f"volume: {price_volume} / owned: {num_owned} / "
+                                 f"total: {str(price_cumulated)} {self.symbol}", lvl='DEBUG')
 
                 total += price_cumulated
 
@@ -153,12 +200,17 @@ class SteamInstance:
         cumulated = {}
         for item in data:
             classid = item['classid']
+
+            # TODO There is some error here, idk
+            if classid == "4783280738":
+                print("HALLO JAAAAA")
+
             if classid in cumulated.keys():
                 cumulated[classid] += 1
             else:
                 cumulated[classid] = 1
 
-        self.log.pipeOut(cumulated, lvl='debug')
+        self.log.pipeOut(cumulated, lvl='ERROR')
 
         return cumulated
 
@@ -204,6 +256,7 @@ class SteamInstance:
         # Check all keys are available
         expected_keys = ['success', 'lowest_price', 'volume', 'median_price']
 
+        # TODO
         """
         ----------------------------------------------------------------------------
         Not sure if i like the retry System.
@@ -216,7 +269,7 @@ class SteamInstance:
         """
 
         # Retries
-        max_retries = 3
+        max_retries = 1
         retries = 1
 
         while retries <= max_retries and not all(k in data for k in expected_keys):
@@ -248,7 +301,7 @@ class SteamInstance:
         while req.status_code != 200:
 
             if req.status_code == 429:
-                self.log.pipeOut(f"We accidentally hit the rate limit, bucket size is {self.bucket}", lvl='warning')
+                self.log.pipeOut(f"We accidentally hit the rate limit, bucket size is [{self.bucket}]", lvl='warning')
                 self.cooldown()
                 req = requests.get(url, cookies=self.cookies)  # Retrying
 

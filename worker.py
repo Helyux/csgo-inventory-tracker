@@ -20,7 +20,7 @@ def main():
 
     # Start logger
     logpath = "./log"
-    logname = "csgo-inventory-tracker.log"
+    logname = "worker.log"
     log = util.Logger(logpath, logname)
 
     # Log any unhandled exception
@@ -38,19 +38,17 @@ def main():
     # Steam
     steam = util_steam.SteamInstance(sql, config, log)
 
-    # Check an Inventory
-    tracked_users = sql.getTracked()
+    print("\n<<< Exit using CTRL-C >>>\n")
+    try:
+        while True:
+            dbid, item_hash = sql.getLastupdated()
+            print(item_hash)
+            price_data = steam.getItemPrice(item_hash)
+            price_data = util_steam.sanatize(price_data)  # Sanatize the Data
+            sql.updateItem(dbid, price_data)
 
-    if not tracked_users:
-        # Add the default ID from config
-        userinfo = steam.getUserInfo(config['Other']['steam_id'])
-        sql.addUser(userinfo)
-        tracked_users = sql.getTracked()
-
-    for tracked_user in tracked_users:
-        print(f"<--- Working on [{tracked_user[2]} / {tracked_user[1]}] --->")
-        total = steam.getInventoryValue(tracked_user[1])
-        print(f"[{tracked_user[2]} / {tracked_user[1]}] total inventory worth is: {total}\n<{30*'-'}>")
+    except KeyboardInterrupt:
+        pass
 
     # Disconnect
     sql.disconnect()
