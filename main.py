@@ -32,7 +32,6 @@ def main():
     # Create and use a new SQL Instance
     sql = util_sql.SQLinstance(config, log)
     sql.connect()
-    sql.check_database()
     sql.check_tables()
 
     # Steam

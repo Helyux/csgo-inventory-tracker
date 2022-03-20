@@ -68,6 +68,9 @@ def sanatize(price_data):
         if key not in sanatized_price_data:
             sanatized_price_data[key] = None
 
+    # TODO Temporary fix, remove the success key
+    sanatized_price_data.pop("success")
+
     return sanatized_price_data
 
 
@@ -168,7 +171,7 @@ class SteamInstance:
                 # Transfer price_data to database
                 dbid = self.sql.getItemDBIDfromHash(item_hash)
                 if dbid:
-                    self.sql.updateItem(dbid, price_data)
+                    self.sql.updateItem(dbid, price_data, classid=item['classid'])
                 else:
                     self.sql.insertItem(item['name'], item_hash, price_data, classid=item['classid'])
 
@@ -201,16 +204,12 @@ class SteamInstance:
         for item in data:
             classid = item['classid']
 
-            # TODO There is some error here, idk
-            if classid == "4783280738":
-                print("HALLO JAAAAA")
+            # TODO I think there is an error here, which doesn't cumulate the same items
 
             if classid in cumulated.keys():
                 cumulated[classid] += 1
             else:
                 cumulated[classid] = 1
-
-        self.log.pipeOut(cumulated, lvl='ERROR')
 
         return cumulated
 

@@ -8,9 +8,6 @@ __date__ = "20.03.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
-# Default
-from datetime import datetime
-
 # Custom
 import mysql.connector
 
@@ -31,22 +28,24 @@ class SQLinstance:
         if not self.db:
             self.log.pipeOut("Please provide the name of the Database in your config.", lvl="critical")
 
+    """ this is relevant when we only connect to a certain database see connect function
     def check_database(self):
         #  Check if the database exists
-        qtx = f"SELECT * FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{self.db}'"
+        qtx = f"SELECT * FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s;"
         if self.connection:
-            if not len(self.query(qtx.replace('DBName', self.db))) > 0:
+            if not len(self.query(qtx, self.db)) > 0:
                 self.log.pipeOut(f"Database {self.db} doesn't exist.", lvl="critical")
             else:
-                self.query(f"USE {self.db}")
+                self.query(f"USE %s", self.db)
                 self.log.pipeOut(f"Database [{self.db}] is ready")
+    """
 
     def check_tables(self):
         # Check if the default needed tables exist
-        qtx = f"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.db}' AND TABLE_NAME = 'TBLName'"
+        qtx = f"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.db}' AND TABLE_NAME = %s"
         if self.connection:
             for table in self.default_tables:
-                if not len(self.query(qtx.replace('TBLName', table))) > 0:
+                if not len(self.query(qtx, table)) > 0:
                     self.setup_table(table)
                 else:
                     self.log.pipeOut(f"Table [{table}] is ready")
@@ -96,9 +95,10 @@ class SQLinstance:
     def connect(self):
         try:
             self.connection = mysql.connector.connect(host=self.hostname, port=self.port,
-                                                      user=self.username, password=self.password)
+                                                      user=self.username, password=self.password,
+                                                      database=self.db)
             self.cursor = self.connection.cursor()
-            self.log.pipeOut(f"Connected to {self.hostname}")
+            self.log.pipeOut(f"Connected to {self.hostname}:{self.port} using Database [{self.db}]")
 
         except mysql.connector.Error as e:
             self.log.pipeOut(e, lvl="critical")
@@ -112,11 +112,20 @@ class SQLinstance:
             self.connection = None
             self.log.pipeOut(f"Disconnected from {self.hostname}")
 
-    def query(self, qtx):
+    def query(self, qtx, values=None):
         rows = []
         if self.connection:
-            self.log.pipeOut(f"SQL statement [{qtx}]", lvl="debug")
-            self.cursor.execute(qtx)
+
+            # We can't use single strings, so convert those to a tuple
+            if values and (isinstance(values, str) or isinstance(values, int)):
+                values = (values,)
+
+            self.log.pipeOut(f"SQL statement [{qtx}] / Values: {values}", lvl="debug")
+
+            if values:
+                self.cursor.execute(qtx, values)
+            else:
+                self.cursor.execute(qtx)
 
             for row in self.cursor:
                 # self.log.pipeOut(f"{row} / {qtx}", lvl="debug")
@@ -134,35 +143,41 @@ class SQLinstance:
 
     def getItemDBIDfromHash(self, item_hash):
         if self.connection:
-            dbid = self.query(f"SELECT ID FROM items WHERE hash = '{item_hash}';")
+            dbid = self.query(f'SELECT ID FROM items WHERE hash = %s;', item_hash)
 
             if dbid:
                 return dbid[0][0]
             else:
                 return None
 
-    def updateItem(self, dbid, price_data):
+    def updateItem(self, dbid, price_data, classid=None):
 
-        # build query
-        available = ""
-        if price_data['lowest_price']:
-            available += f"Lowest={price_data['lowest_price']}"
-        if price_data['median_price']:
-            available += f", Median={price_data['median_price']}"
-        if price_data['volume']:
-            available += f", Volume={price_data['volume']}"
+        val = {'id': dbid,
+               'classid': classid,
+               'lowest': price_data['lowest_price'],
+               'median': price_data['median_price'],
+               'volume': price_data['volume']}
 
-        qtx = f"UPDATE items SET {available}, Updated=NOW() WHERE ID={dbid};"
+        qtx = f"UPDATE items SET ClassID=%(classid)s , " \
+              f"Lowest=%(lowest)s, Median=%(median)s, volume=%(volume)s, " \
+              f"Updated=NOW() WHERE ID=%(id)s;"
 
-        self.query(qtx)
+        self.query(qtx, val)
         self.connection.commit()
 
     def insertItem(self, item_name, item_hash, price_data, classid=None):
-        qtx = f"INSERT INTO items (Name, Hash, ClassID, Lowest, Median, Volume) " \
-              f"VALUES ('{item_name}', '{item_hash}', {classid}, " \
-              f"{price_data['lowest_price']}, {price_data['median_price']}, {price_data['volume']});"
 
-        self.query(qtx)
+        val = {'name': item_name,
+               'hash': item_hash,
+               'classid': classid,
+               'lowest': price_data['lowest_price'],
+               'median': price_data['median_price'],
+               'volume': price_data['volume']}
+
+        qtx = f"INSERT INTO items (Name, Hash, ClassID, Lowest, Median, Volume) " \
+              f"VALUES (%(name)s, %(hash)s, %(classid)s, %(lowest)s, %(median)s, %(volume)s)"
+
+        self.query(qtx, val)
         self.connection.commit()
 
     def getTracked(self):
@@ -173,7 +188,7 @@ class SQLinstance:
 
     def getUser(self, steam_id):
         if self.connection:
-            users = self.query(f"SELECT * FROM users WHERE SteamID = {steam_id};")
+            users = self.query(f"SELECT * FROM users WHERE SteamID = %s;", steam_id)
 
             return users
 
@@ -184,9 +199,9 @@ class SQLinstance:
             if len(self.getUser(userinfo['id'])) == 0:
 
                 qtx = f"INSERT INTO users (Nickname, SteamID, Customurl) " \
-                      f"VALUES ('{userinfo['nickname']}',{userinfo['id']},'{userinfo['customurl']}');"
+                      f"VALUES (%(nickname)s, %(id)s, %(customurl)s);"
 
-                self.query(qtx)
+                self.query(qtx, userinfo)
                 self.connection.commit()
 
             else:
