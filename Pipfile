@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 mysql-connector-python = "*"
-requests = "*"
 toml = "*"
+requests = "*"
 
 [dev-packages]
 
