@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "20.03.2022"
+__date__ = "21.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -150,35 +150,52 @@ class SQLinstance:
             else:
                 return None
 
+    def getItemfromHash(self, item_hash):
+        if self.connection:
+            item = self.query(f'SELECT * FROM items WHERE hash = %s;', item_hash)
+
+            if item:
+                return item[0]
+            else:
+                return None
+
+    def getItembyID(self, dbid):
+        item = self.query(f'SELECT * FROM items WHERE id = %s;', dbid)[0]
+        return item
+
     def updateItem(self, dbid, price_data, classid=None):
+        if self.connection:
+            val = {'id': dbid,
+                   'classid': classid,
+                   'lowest': price_data['lowest_price'],
+                   'median': price_data['median_price'],
+                   'volume': price_data['volume']}
 
-        val = {'id': dbid,
-               'classid': classid,
-               'lowest': price_data['lowest_price'],
-               'median': price_data['median_price'],
-               'volume': price_data['volume']}
+            if classid:
+                qtx = f"UPDATE items SET ClassID=%(classid)s , " \
+                      f"Lowest=%(lowest)s, Median=%(median)s, volume=%(volume)s, " \
+                      f"Updated=NOW() WHERE ID=%(id)s;"
+            else:
+                qtx = f"UPDATE items SET Lowest=%(lowest)s, Median=%(median)s, volume=%(volume)s, " \
+                      f"Updated=NOW() WHERE ID=%(id)s;"
 
-        qtx = f"UPDATE items SET ClassID=%(classid)s , " \
-              f"Lowest=%(lowest)s, Median=%(median)s, volume=%(volume)s, " \
-              f"Updated=NOW() WHERE ID=%(id)s;"
-
-        self.query(qtx, val)
-        self.connection.commit()
+            self.query(qtx, val)
+            self.connection.commit()
 
     def insertItem(self, item_name, item_hash, price_data, classid=None):
+        if self.connection:
+            val = {'name': item_name,
+                   'hash': item_hash,
+                   'classid': classid,
+                   'lowest': price_data['lowest_price'],
+                   'median': price_data['median_price'],
+                   'volume': price_data['volume']}
 
-        val = {'name': item_name,
-               'hash': item_hash,
-               'classid': classid,
-               'lowest': price_data['lowest_price'],
-               'median': price_data['median_price'],
-               'volume': price_data['volume']}
+            qtx = f"INSERT INTO items (Name, Hash, ClassID, Lowest, Median, Volume) " \
+                  f"VALUES (%(name)s, %(hash)s, %(classid)s, %(lowest)s, %(median)s, %(volume)s)"
 
-        qtx = f"INSERT INTO items (Name, Hash, ClassID, Lowest, Median, Volume) " \
-              f"VALUES (%(name)s, %(hash)s, %(classid)s, %(lowest)s, %(median)s, %(volume)s)"
-
-        self.query(qtx, val)
-        self.connection.commit()
+            self.query(qtx, val)
+            self.connection.commit()
 
     def getTracked(self):
         if self.connection:
@@ -206,6 +223,23 @@ class SQLinstance:
 
             else:
                 self.log.pipeOut(f"User already exists in database, not adding [{userinfo['nickname']}]", lvl='warning')
+
+    def addInventory(self, uid, total):
+        if self.connection:
+            val = {'uid': uid,
+                   'total': int(total)}
+
+            qtx = f"INSERT INTO inventories (UID, Value) " \
+                  f"VALUES (%(uid)s, %(total)s);"
+
+            self.query(qtx, val)
+            self.connection.commit()
+
+    def update_last_checked(self, uid):
+        qtx = f"UPDATE users SET LastChecked=NOW() WHERE ID=%({uid})s;"
+
+        self.query(qtx)
+        self.connection.commit()
 
 
 if __name__ == "__main__":

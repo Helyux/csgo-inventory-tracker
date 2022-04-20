@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "20.03.2022"
+__date__ = "21.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -29,6 +29,9 @@ def main():
     # Load toml config
     config = util.getConf("prod.toml", log)
 
+    # Change loglevel from config
+    log.changeLevel(config['Log']['level'])
+
     # Create and use a new SQL Instance
     sql = util_sql.SQLinstance(config, log)
     sql.connect()
@@ -41,7 +44,6 @@ def main():
     try:
         while True:
             dbid, item_hash = sql.getLastupdated()
-            print(item_hash)
             price_data = steam.getItemPrice(item_hash)
             price_data = util_steam.sanatize(price_data)  # Sanatize the Data
             sql.updateItem(dbid, price_data)

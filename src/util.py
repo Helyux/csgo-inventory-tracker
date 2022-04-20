@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "20.03.2022"
+__date__ = "21.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -32,7 +32,7 @@ def getConf(fname, log):
                 checkConf(config)
                 return config
             except ValueError as e:
-                log.pipeOut(f"The provided '.toml' is probably invalid, returned error:\n{e}", lvl="critical")
+                log.pipeOut(f"The provided '.toml' is probably invalid, returned error: [{e}]", lvl="critical")
         else:
             log.pipeOut(f"Couldn't locate the '.toml' file [{fname}].", lvl="error")
             log.pipeOut("Creating a new '.toml' file from template, please edit and restart.")
@@ -49,7 +49,15 @@ def checkConf(config):
     """
     TODO check if keys exist
     """
-    pass
+
+    if config['Other']['idfile']:
+        if os.path.exists("./idfile.txt"):
+            with open('idfile.txt', 'r') as f:
+                config['tracked_ids'] = [line.strip() for line in f.readlines()]
+        else:
+            with open('idfile.txt', 'w') as f:
+                f.write(config['Other']['steam_id'] + "\n")
+                config['tracked_ids'] = config['Other']['steam_id']
 
 
 class Logger:
@@ -73,6 +81,12 @@ class Logger:
         self.log.addHandler(handler)
         self.log.setLevel(lvl)
 
+    def changeLevel(self, lvl):
+        """
+        Change the loglevel after creation
+        """
+        self.log.setLevel(logging.getLevelName(lvl))
+
     def pipeOut(self, msg, lvl="INFO"):
         """
         All output pipes through this function.
@@ -84,7 +98,7 @@ class Logger:
         lvln = int(getattr(logging, lvl))
         self.log.log(lvln, msg)
 
-        if self.reprint and lvln >= self.log.level:
+        if self.reprint and lvln >= self.log.getEffectiveLevel():
             print(f"[{time.strftime('%H:%M:%S')}]{f'[{lvl}]':10s} {msg}")
 
         if lvl == "CRITICAL":

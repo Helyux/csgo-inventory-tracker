@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "20.03.2022"
+__date__ = "21.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -166,26 +166,60 @@ class SteamInstance:
             if item['marketable'] == 1:
                 num_owned = cumulated[item['classid']]
                 item_hash = item['market_hash_name']
-                price_data = sanatize(self.getItemPrice(item_hash))
 
-                # Transfer price_data to database
-                dbid = self.sql.getItemDBIDfromHash(item_hash)
-                if dbid:
-                    self.sql.updateItem(dbid, price_data, classid=item['classid'])
+                # Only request new prices when it's a new item_hash or the data is stale
+                stale = True
+                sql_item = self.sql.getItemfromHash(item_hash)
+
+                if not sql_item:
+                    price_data = sanatize(self.getItemPrice(item_hash))
                 else:
-                    self.sql.insertItem(item['name'], item_hash, price_data, classid=item['classid'])
+                    updated = sql_item[7]
+                    if updated < datetime.datetime.now() - datetime.timedelta(hours=1):
+                        price_data = sanatize(self.getItemPrice(item_hash))
+                    else:
+                        # We can use the data from the database entry
+                        stale = False
+                        self.log.pipeOut(f"Using cached non stale database values for [{item_hash}]", lvl='DEBUG')
+                        price_data = {'lowest_price': sql_item[4],
+                                      'median_price': sql_item[5],
+                                      'volume': sql_item[6]}
 
                 price_lowest = price_data['lowest_price']
                 price_median = price_data['median_price']
                 price_volume = price_data['volume']
 
-                if not price_data['lowest_price']:
-                    # Price lowest is needed for calculation, atleast show error where missing
-                    # Would be good to take the last entry in the db if we couldn't get a new one
-                    self.log.pipeOut(f"No 'lowest_price' on {item['name']}, calculation might be false", lvl='error')
-                    continue
+                if price_lowest:
 
-                price_cumulated = float(num_owned) * float(price_lowest)
+                    calculation_price = price_lowest
+
+                    # Transfer price_data to database
+                    if stale:
+                        if sql_item:
+                            self.sql.updateItem(sql_item[0], price_data, classid=item['classid'])
+                        else:
+                            self.sql.insertItem(item['name'], item_hash, price_data, classid=item['classid'])
+
+                else:
+                    # Don't transfer into sql since no price_lowest!
+                    # Price lowest is needed, show an error when it's missing
+                    # We can calculate with an old Value
+
+                    self.log.pipeOut(f"No 'lowest_price' on {item['name']}, "
+                                     f"calculation might be inadequate since we use other (stale) values", lvl='error')
+
+                    # Do we have the median?
+                    if price_median:
+                        calculation_price = price_median
+                    else:
+                        # Do we have an old value?
+                        if sql_item:
+                            calculation_price = sql_item[4]
+                        else:
+                            # We are fucked, just use 0.
+                            calculation_price = 0
+
+                price_cumulated = float(num_owned) * float(calculation_price)
 
                 self.log.pipeOut(f"lowest: {price_lowest} {self.symbol} / median: {price_median} {self.symbol} / "
                                  f"volume: {price_volume} / owned: {num_owned} / "
@@ -195,7 +229,8 @@ class SteamInstance:
 
         return total
 
-    def getCumulated(self, data):
+    @staticmethod
+    def getCumulated(data):
         """
 
         """
@@ -233,7 +268,7 @@ class SteamInstance:
             nsold = []
 
             for price_point in data:
-                time = datetime.datetime.strptime(price_point[0], "%b %d %Y %H: +0").strftime("%d.%m.%y - %H:%M GMT")
+                xtime = datetime.datetime.strptime(price_point[0], "%b %d %Y %H: +0").strftime("%d.%m.%y - %H:%M GMT")
                 prices.append(price_point[1])
                 nsold.append(price_point[2])
 
@@ -283,7 +318,7 @@ class SteamInstance:
         if data:
             return data
 
-    def doSteamRequest(self, url):
+    def doSteamRequest(self, url, proxy=None):
         """
 
         """
@@ -293,16 +328,17 @@ class SteamInstance:
 
         url = requote_uri(url)  # requote because item_hash often contains spaces
 
-        self.log.pipeOut(f"Requesting [{url}]", lvl='debug')
-        req = requests.get(url, cookies=self.cookies)
+        self.log.pipeOut(f"Requesting [{url}] | Proxy = {proxy['https'] if proxy else None}", lvl='debug')
+        req = requests.get(url, cookies=self.cookies, proxies=proxy, timeout=10)
         self.bucket += 1
 
         while req.status_code != 200:
 
             if req.status_code == 429:
+                # TODO Implement a proxy cycle sytem if we hit the rate limit
                 self.log.pipeOut(f"We accidentally hit the rate limit, bucket size is [{self.bucket}]", lvl='warning')
                 self.cooldown()
-                req = requests.get(url, cookies=self.cookies)  # Retrying
+                req = requests.get(url, cookies=self.cookies, proxies=proxy, timeout=10)  # Retrying
 
             else:
                 self.log.pipeOut(f"Request failed, status code is: {req.status_code}")
