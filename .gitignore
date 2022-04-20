@@ -136,3 +136,6 @@ prod.toml
 
 # Log
 log/
+
+# txt
+txt/
