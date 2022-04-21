@@ -1,21 +1,16 @@
 <div id="top">
 <!-- src: https://github.com/othneildrew/Best-README-Template -->
+<!-- see: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 </div>
 
 
 <!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+[![Xing][xing-shield]][xing-url]
 
 
 <!-- PROJECT LOGO -->
@@ -49,10 +44,10 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites :airplane:</a></li>
-        <li><a href="#SQL Configuration">SQL Configuration :wrench:</a></li>
-        <li><a href="#installation">Installation :zap:</a></li>
-        <li><a href="#configuration">Configuration :clipboard:</a></li>
+        <li><a href="#prerequisites-airplane">Prerequisites :airplane:</a></li>
+        <li><a href="#sql-configuration-wrench">SQL Configuration :wrench:</a></li>
+        <li><a href="#installation-zap">Installation :zap:</a></li>
+        <li><a href="#configuration--clipboard">Configuration :clipboard:</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -82,6 +77,11 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites :airplane:
 
+* Pipenv
+  ```sh
+  pip install pipenv
+  ```
+
 * MySQL Server
   ```sh
   sudo apt update
@@ -97,39 +97,39 @@ To get a local copy up and running follow these simple example steps.
   ```
 
 2. Create a SQL User
-  ```sh
+  ```SQL
   CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';`
   ```
 
 3. Setup a SQL Database
-  ```sh
+  ```SQL
   CREATE DATABASE IF NOT EXISTS databasename;
   ```
 
 4. Grant all rights for the created user to the created database
-  ```sh
+  ```SQL
   GRANT ALL PRIVILEGES ON databasename.* TO 'username'@'localhost';
   ```
 
 5. Flush privileges
-  ```sh
+  ```SQL
   FLUSH PRIVILEGES;
   ```
 
 ### Installation :zap:
 
 1. Clone the repository
-   ```sh
+  ```sh
    git clone https://github.com/Helyux/csgo-inventory-tracker
-   ```
+  ```
 2. Install python packages from pipfile
-   ```sh
+  ```sh
    pipenv install
-   ```
+  ```
 3. Run the entry script
-   ```sh
+  ```sh
    pipenv run python main.py
-   ```
+  ```
 
 ### Configuration  :clipboard:
 1. Make a copy of template.toml named prod.toml in the base directory
@@ -186,7 +186,7 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Lukas Mahler - [@LyuxGG](https://twitter.com/LyuxGG) - m@hler.eu
+Lukas Mahler - [@LyuxGG](https://twitter.com/LyuxGG) - [m@hler.eu](mailto:m@hler.eu)
 
 Project Link: [https://github.com/Helyux/csgo-inventory-tracker](https://github.com/Helyux/csgo-inventory-tracker)
 
@@ -196,7 +196,7 @@ Project Link: [https://github.com/Helyux/csgo-inventory-tracker](https://github.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+Resources i used and found helpful while building this.
 
 * [Choose an Open Source License](https://choosealicense.com)
 * [Img Shields](https://shields.io)
@@ -216,4 +216,6 @@ Use this space to list resources you find helpful and would like to give credit 
 [issues-shield]: https://img.shields.io/github/issues/Helyux/csgo-inventory-tracker.svg?style=for-the-badge
 [issues-url]: https://github.com/Helyux/csgo-inventory-tracker/issues
 [license-shield]: https://img.shields.io/github/license/Helyux/csgo-inventory-tracker.svg?style=for-the-badge
-[license-url]: https://github.com/Helyux/csgo-inventory-tracker/blob/master/LICENSE.txt
+[license-url]: https://github.com/Helyux/csgo-inventory-tracker/blob/master/LICENSE
+[xing-shield]: https://img.shields.io/static/v1?style=for-the-badge&message=Xing&color=006567&logo=Xing&logoColor=FFFFFF&label
+[xing-url]: https://www.xing.com/profile/Lukas_Mahler10
