@@ -3,6 +3,7 @@
 <!-- see: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 </div>
 
+<div id="shields" align="center">
 
 <!-- PROJECT SHIELDS -->
 [![Contributors][contributors-shield]][contributors-url]
@@ -11,7 +12,7 @@
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![Xing][xing-shield]][xing-url]
-
+</div>
 
 <!-- PROJECT LOGO -->
 <br />
@@ -77,17 +78,17 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites :airplane:
 
-* Pipenv
-  ```sh
-  pip install pipenv
-  ```
-
 * MySQL Server
-  ```sh
-  sudo apt update
-  sudo apt install mysql-server
-  sudo mysql_secure_installation
-  ```
+```sh
+sudo apt update
+sudo apt install mysql-server
+sudo mysql_secure_installation
+```
+  
+* Pipenv
+```sh
+pip install pipenv
+```
 
 ### SQL Configuration :wrench:
 
@@ -141,7 +142,7 @@ To get a local copy up and running follow these simple example steps.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Blah Blah Blah, this is how you can use it, blah blah
 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
