@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "21.04.2022"
+__date__ = "23.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -117,25 +117,31 @@ class SteamInstance:
 
         """
 
-        url = f"https://steamcommunity.com/inventory/{steam_id}/730/2"
+        url = f"https://steamcommunity.com/profiles/{steam_id}/inventory/json/730/2"
 
-        """
         # This is production
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
-        """
 
         """
         # Get json to test with once
         req = self.doSteamRequest(url)
         data = json.loads(req.text)
-        with open('example_data.json', 'w') as f:
+        with open(f'example_data.json', 'w') as f:
             json.dump(data, f)
+
+        # TODO DEBUG
+
+        if 'more' in data:
+            print(data['more'])
+            print(data['more_start'])
         """
 
+        """
         # This is to test
         with open('example_data.json') as tx:
             data = json.load(tx)
+        """
 
         if data:
             return data
@@ -156,9 +162,9 @@ class SteamInstance:
             self.log.pipeOut(f"No data for id {steam_id}", lvl="warning")
             return
 
-        cumulated = self.getCumulated(data['assets'])
+        cumulated = self.getCumulated(data['rgInventory'])
 
-        for item in data['descriptions']:
+        for item in data['rgDescriptions'].values():
 
             self.log.pipeOut(f"Bucket: {self.bucket} / Name {item['name']} / "
                              f"Tradeable {item['tradable']} / Marketable {item['marketable']}", lvl='DEBUG')
@@ -236,10 +242,9 @@ class SteamInstance:
         """
 
         cumulated = {}
-        for item in data:
-            classid = item['classid']
+        for item in data.values():
 
-            # TODO I think there is an error here, which doesn't cumulate the same items
+            classid = item['classid']
 
             if classid in cumulated.keys():
                 cumulated[classid] += 1

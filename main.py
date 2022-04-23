@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "21.04.2022"
+__date__ = "23.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -41,7 +41,7 @@ def main():
     steam = util_steam.SteamInstance(sql, config, log)
 
     # If we use an idfile check if we added all to our database, else add them
-    if config['tracked_ids']:
+    if 'tracked_ids' in config:
         for tracked_id in config['tracked_ids']:
             user = sql.getUser(tracked_id)
             if not user:
@@ -64,11 +64,11 @@ def main():
         sql_steam_id = tracked_user[1]
         sql_steam_nickname = tracked_user[2]
 
-        print(f"<--- {f'Working on [{sql_steam_nickname} / {sql_steam_id}]':^70} --->")
+        log.pipeOut(f"<--- {f'Working on [{sql_steam_nickname} / {sql_steam_id}]':^80} --->")
         total = steam.getInventoryValue(sql_steam_id)
         sql.addInventory(sql_uid, total)
-        print(f"[{tracked_user[2]} / {tracked_user[1]}] total inventory worth is: {total:.2f}{steam.symbol}")
-        print(f"<{78*'-'}>")
+        log.pipeOut(f"[{tracked_user[2]} / {tracked_user[1]}] total inventory worth is: {total:.2f}{steam.symbol}")
+        log.pipeOut(f"<{88*'-'}>")
 
     # Disconnect
     sql.disconnect()
