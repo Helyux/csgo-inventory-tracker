@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "23.04.2022"
+__date__ = "26.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -207,22 +207,25 @@ class SteamInstance:
                             self.sql.insertItem(item['name'], item_hash, price_data, classid=item['classid'])
 
                 else:
-                    # Don't transfer into sql since no price_lowest!
-                    # Price lowest is needed, show an error when it's missing
-                    # We can calculate with an old Value
+                    # Don't transfer into sql since no new price_lowest!
+                    # price_lowest is needed, show a warning when it's missing
+                    # We can calculate with the median or an old value tho
 
-                    self.log.pipeOut(f"No 'lowest_price' on {item['name']}, "
-                                     f"calculation might be inadequate since we use other (stale) values", lvl='error')
+                    self.log.pipeOut(f"No 'lowest_price' on [{item['name']}], "
+                                     f"calculation might be inadequate since we use (stale) values", lvl='WARNING')
 
                     # Do we have the median?
                     if price_median:
+                        self.log.pipeOut("We used the newly gathered median", lvl="DEBUG")
                         calculation_price = price_median
                     else:
                         # Do we have an old value?
                         if sql_item:
+                            self.log.pipeOut("We used the old lowest_price", lvl="DEBUG")
                             calculation_price = sql_item[4]
                         else:
                             # We are fucked, just use 0.
+                            self.log.pipeOut("We couldn't even find a stale value, using 0 for this item", lvl="ERROR")
                             calculation_price = 0
 
                 price_cumulated = float(num_owned) * float(calculation_price)

@@ -4,7 +4,7 @@ TBD
 
 __author__ = "Lukas Mahler"
 __version__ = "0.0.0"
-__date__ = "23.04.2022"
+__date__ = "26.04.2022"
 __email__ = "m@hler.eu"
 __status__ = "Development"
 
@@ -68,7 +68,7 @@ def main():
         total = steam.getInventoryValue(sql_steam_id)
         sql.addInventory(sql_uid, total)
         log.pipeOut(f"[{tracked_user[2]} / {tracked_user[1]}] total inventory worth is: {total:.2f}{steam.symbol}")
-        log.pipeOut(f"<{88*'-'}>")
+        log.pipeOut(f"<{88*'-'}>\n")
 
     # Disconnect
     sql.disconnect()
